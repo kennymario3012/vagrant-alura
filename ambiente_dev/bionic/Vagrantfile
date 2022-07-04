@@ -8,6 +8,5 @@ Vagrant.configure("2") do |config|
   #_Configuração de rede privada com dhcp
   #  config.vm.network "private_network", type: "dhcp"
 
-
   config.vm.network "public_network", type: "dhcp"
 end
