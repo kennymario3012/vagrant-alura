@@ -8,17 +8,25 @@ Vagrant.configure("2") do |config|
   
   config.vm.box = "ubuntu/bionic64"
 
-  config.vm.define "phpweb" do |php_config|
+  config.vm.define "phpweb" do |phpweb|
       
-    php_config.vm.network "forwarded_port", guest: 80, host: 8089
-    php_config.vm.network "public_network", type: "dhcp"
+    phpweb.vm.network "forwarded_port", guest: 8888, host: 8888
+    phpweb.vm.network "public_network", type: "dhcp"
     
-    php_config.vm.provision "shell", 
+    phpweb.vm.provision "shell", 
       inline: "cat /configs/keys/id_bionic.pub >> .ssh/authorized_keys"
 
-    php_config.vm.synced_folder ".", "/vagrant", disabled: true
+    phpweb.vm.provision "shell",
+      inline: "apt-get update && apt-get install -y puppet"
 
-    php_config.vm.synced_folder  "./keys", "/configs/keys"
+    phpweb.vm.provision "puppet" do |puppet|
+      puppet.manifests_path = "./manifests"
+      puppet.manifest_file = "phpweb.pp"
+    end
+
+    phpweb.vm.synced_folder ".", "/vagrant", disabled: true
+    phpweb.vm.synced_folder  "./keys", "/configs/keys"
+    phpweb.vm.synced_folder  "./webroot", "/webroot"
     
   end
 
