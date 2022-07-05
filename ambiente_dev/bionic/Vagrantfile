@@ -1,19 +1,46 @@
+$script_mysql = <<-SCRIPT
+  apt-get update && \
+  apt-get install -y mysql-server-5.7 && \
+  mysql -e "create user 'phpuser'@'%' identified by 'pass';"
+SCRIPT
+
 Vagrant.configure("2") do |config|
-  config.vm.box = "ubuntu/bionic64"
   
+  config.vm.box = "ubuntu/bionic64"
+
+  config.vm.define "phpweb" do |php_config|
+      
+    php_config.vm.network "forwarded_port", guest: 80, host: 8089
+    php_config.vm.network "public_network", type: "dhcp"
+    
+    php_config.vm.provision "shell", 
+      inline: "cat /configs/keys/id_bionic.pub >> .ssh/authorized_keys"
+
+    php_config.vm.synced_folder ".", "/vagrant", disabled: true
+
+    php_config.vm.synced_folder  "./keys", "/configs/keys"
+    
+  end
+
+  config.vm.define "mysqldb" do |mysql_config|
+
+    mysql_config.vm.network "public_network", type: "dhcp"
+
+    mysql_config.vm.provision "shell", inline:  "cat /configs/keys/id_bionic.pub >> .ssh/authorized_keys"
+
+    mysql_config.vm.provision "shell", inline: $script_mysql
+    # mysql_config.vm.provision "shell", inline: "cat /configs/mysqld.cnf > /etc/mysql/mysql.conf.d/mysqld.cnf"
+    # mysql_config.vm.provision "shell", inline: "service mysql restart"
+
+    mysql_config.vm.synced_folder  "./keys", "/configs/keys"
+
+    mysql_config.vm.synced_folder ".", "/vagrant", disabled: true
+  end
+
   #_Configuração de rede privada com IP estatico
   # config.vm.network "private_network", ip: "192.168.56.4"
 
   #_Configuração de rede privada com dhcp
   #  config.vm.network "private_network", type: "dhcp"
-
-  config.vm.network "public_network", type: "dhcp"
-
-  config.vm.provision "shell", 
-    inline: "cat /configs/keys/id_bionic.pub >> .ssh/authorized_keys"
-
-
-  config.vm.synced_folder  "./keys", "/configs/keys"
-
 
 end
