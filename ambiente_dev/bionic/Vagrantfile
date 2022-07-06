@@ -6,6 +6,12 @@ Vagrant.configure("2") do |config|
       
     phpweb.vm.network "forwarded_port", guest: 8888, host: 8888
     phpweb.vm.network "public_network", type: "dhcp"
+
+    phpweb.vm.provider "virtualbox" do |vb|
+          vb.memory = 512
+          vb.cpus = 1
+          vb.name = "ubuntu_phpweb"
+    end
     
     phpweb.vm.provision "shell", 
       inline: "cat /configs/keys/id_bionic.pub >> .ssh/authorized_keys"
@@ -26,9 +32,14 @@ Vagrant.configure("2") do |config|
   config.vm.define "mysqldb" do |mysql_config|
 
     mysql_config.vm.network "public_network", type: "dhcp"
-
     mysql_config.vm.provision "shell", inline:  "cat /configs/keys/id_bionic.pub >> .ssh/authorized_keys"
    
+    mysql_config.vm.provider "virtualbox" do |vb|
+      vb.memory = 512
+      vb.cpus = 1
+      vb.name = "ubuntu_mysql"
+    end
+
     mysql_config.vm.provision :host_shell do |host_shell|
        host_shell.inline = '/bin/sh configs/script/addHost.sh'
     end
