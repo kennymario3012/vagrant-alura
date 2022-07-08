@@ -4,24 +4,31 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "phpweb" do |phpweb|
       
-    phpweb.vm.network "forwarded_port", guest: 8888, host: 8888
+    phpweb.vm.network "forwarded_port", guest: 80, host: 8989
     phpweb.vm.network "public_network", type: "dhcp"
 
     phpweb.vm.provider "virtualbox" do |vb|
           vb.memory = 512
           vb.cpus = 1
-          vb.name = "ubuntu_phpweb"
+          vb.name = "phpweb"
     end
     
     phpweb.vm.provision "shell", 
       inline: "cat /configs/keys/id_bionic.pub >> .ssh/authorized_keys"
+      
+    phpweb.vm.provision :host_shell do |host_shell|
+       host_shell.inline = '/bin/sh configs/script/addHost.sh phpweb'
+    end
 
-    phpweb.vm.provision "shell",
-      inline: "apt-get update && apt-get install -y puppet"
+    # phpweb.vm.provision "shell",
+    #   inline: "apt-get update && apt-get install -y puppet"
 
-    phpweb.vm.provision "puppet" do |puppet|
-      puppet.manifests_path = "./configs/manifests"
-      puppet.manifest_file = "phpweb.pp"
+    # phpweb.vm.provision "puppet" do |puppet|
+    #   puppet.manifests_path = "./configs/manifests"
+    #   puppet.manifest_file = "phpweb.pp"
+    # end
+    phpweb.vm.provision "ansible" do |ansible|
+      ansible.playbook = "/home/mdadmin/Documents/STUDY/ALURA/DEVOPS/ansible_alura/wordpressSite/provission.yml"
     end
 
     phpweb.vm.synced_folder ".", "/vagrant", disabled: true
@@ -30,22 +37,22 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define "mysqldb" do |mysql_config|
-
+    mysql_config.vm.network "forwarded_port", guest: 3306, host: 8306
     mysql_config.vm.network "public_network", type: "dhcp"
     mysql_config.vm.provision "shell", inline:  "cat /configs/keys/id_bionic.pub >> .ssh/authorized_keys"
    
     mysql_config.vm.provider "virtualbox" do |vb|
       vb.memory = 512
       vb.cpus = 1
-      vb.name = "ubuntu_mysql"
+      vb.name = "mysqldb"
     end
 
     mysql_config.vm.provision :host_shell do |host_shell|
-       host_shell.inline = '/bin/sh configs/script/addHost.sh'
+       host_shell.inline = '/bin/sh configs/script/addHost.sh mysqldb'
     end
 
     mysql_config.vm.provision "ansible" do |ansible|
-      ansible.playbook = "configs/ansible/mysql.yml"
+      ansible.playbook = "/home/mdadmin/Documents/STUDY/ALURA/DEVOPS/ansible_alura/wordpressSite/provission.yml"
     end
     # mysql_config.vm.provision "shell", inline: "cat /configs/mysqld.cnf > /etc/mysql/mysql.conf.d/mysqld.cnf"
     # mysql_config.vm.provision "shell", inline: "service mysql restart"

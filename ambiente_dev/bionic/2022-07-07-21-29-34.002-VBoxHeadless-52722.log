@@ -1,0 +1,12 @@
+Log created: 2022-07-07T21:29:34.024672000Z
+Process ID:  52722 (0xcdf2)
+Parent PID:  4619 (0x120b)
+Executable:  /usr/lib/virtualbox/VBoxHeadless
+Arg[0]: /usr/lib/virtualbox/VBoxHeadless
+Arg[1]: --comment
+Arg[2]: ubuntu_mysql
+Arg[3]: --startvm
+Arg[4]: 4bdfb1a3-7d3a-42c8-b31e-46e5b5dc915d
+Arg[5]: --vrde
+Arg[6]: config
+AddRef: illegal refcnt=3221225469 state=2
